@@ -1,7 +1,4 @@
 //
-//  ViewController.swift
-//  GetContactCocoa
-//
 //  Created by Alexander Borodin on 17/04/2019.
 //  Copyright © 2019 Alexander Borodin. All rights reserved.
 //
@@ -39,16 +36,19 @@ struct Tags : Codable {
 
 struct result: Codable {
     let status : String?
+    let message : String?
     let tags : [Tags]?
     
     enum CodingKeys: String, CodingKey {
         case status = "status"
+        case message = "message"
         case tags = "tags"
     }
     
     init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
         status = try values.decodeIfPresent(String.self, forKey: .status)
+        message = try values.decodeIfPresent(String.self, forKey: .message)
         tags = try values.decodeIfPresent([Tags].self, forKey: .tags)
     }
 }
@@ -93,6 +93,8 @@ class ViewController: NSViewController {
                         toCSV.append(item.tag ?? "")
                     }
                     print(toCSV)
+                } else {
+                    print(information.message)
                 }
             } catch {
                 print(error)
@@ -109,7 +111,9 @@ class ViewController: NSViewController {
         let csv = try! CSVReader(stream: stream)
         
         while let row = csv.next() {
-            resultStr = resultStr + directPhone(phone: row[0]) + "\n"
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(2)) {
+                resultStr = resultStr + self.directPhone(phone: row[0]) + "\n"
+            }
         }
         
         let filename = getDocumentsDirectory().appendingPathComponent("out.csv")
